@@ -13,6 +13,7 @@
 ### Session 2026-06-04
 
 - Q: Is runtime monitor configuration (add/edit/pause URLs and keywords without redeploy) required? → A: No — operator changes the list of monitored websites by redeploying; no in-app configuration UI.
+- Q: Where is the list of pages to monitor stored? → A: **Supabase table** `monitored_pages`, edited manually in Supabase Table Editor (no in-app admin UI). Initial rows: `https://ofg-web-shop.com/?pid=176762784`, `https://ofg-web-shop.com/?pid=165901954`.
 - Q: Which keyword(s) must be detected on each page? → A: Only **在庫数** (inventory count label) on any given monitored page.
 - Q: What must each alert email contain when a match occurs? → A: The page URL and the text content of the `<h4>` element inside `<div class="flr">` on that page (not generic body excerpts around the keyword).
 
@@ -20,7 +21,7 @@
 
 ### User Story 1 - Receive alert when 在庫数 appears (Priority: P1)
 
-As a monitor operator, I deploy the bot with a fixed list of website URLs and a notification email address. On each scheduled check, the system fetches each URL, searches the page for the keyword **在庫数**, and when it is present sends me an email. Each email entry includes that page’s URL and the text from the `<h4>` inside `<div class="flr">` on that page.
+As a monitor operator, I deploy the bot and maintain a list of website URLs in the Supabase database (via Table Editor). Each scheduled check reads enabled URLs from that table and uses a configured notification email address. On each scheduled check, the system fetches each URL, searches the page for the keyword **在庫数**, and when it is present sends me an email. Each email entry includes that page’s URL and the text from the `<h4>` inside `<div class="flr">` on that page.
 
 **Why this priority**: This is the core value—knowing when inventory-related content appears on watched pages, with the specific stock heading text the operator cares about.
 
@@ -62,13 +63,13 @@ As a monitor operator, I do not receive repeated emails for the same unchanged m
 
 ### Functional Requirements
 
-- **FR-001**: System MUST read the list of target URLs, check schedule, and notification recipient(s) from deployment configuration (changed only by redeploy, not at runtime).
+- **FR-001**: System MUST read the list of target URLs from the `monitored_pages` table (rows where `enabled = true`); check schedule and notification recipient(s) from deployment configuration (secrets/env).
 - **FR-002**: System MUST fetch each configured URL on the deployment schedule.
 - **FR-003**: System MUST treat a page as a match only when the literal keyword **在庫数** appears in the fetched page content.
 - **FR-004**: For each matching URL, system MUST locate `<div class="flr">` and extract the text content of its `<h4>` element(s).
 - **FR-005**: System MUST send an email to configured recipient(s) when at least one URL matches in a check run.
 - **FR-006**: Each alert email MUST include, for every matching URL: the page URL and the extracted `<h4>` text from `<div class="flr">` on that page.
-- **FR-007**: System MUST NOT provide runtime UI or APIs to add, edit, pause, or remove monitors; URL list changes require redeploy.
+- **FR-007**: System MUST NOT provide a custom admin UI or public API to manage URLs; operators add, edit, disable, or remove rows in `monitored_pages` via Supabase Table Editor.
 - **FR-008**: System MUST suppress repeat alert emails for the same URL when 在庫数 is still present and the extracted `<h4>` text is substantively unchanged across consecutive successful checks.
 - **FR-009**: System MUST batch all new matches from a single check run into one email when multiple URLs match in that run.
 - **FR-010**: System MUST continue checking remaining URLs when one URL fails to fetch.
@@ -76,7 +77,8 @@ As a monitor operator, I do not receive repeated emails for the same unchanged m
 
 ### Key Entities
 
-- **Deployment configuration**: Fixed at deploy time; includes target URL list, check schedule, and notification recipient email address(es).
+- **Monitored page**: Row in `monitored_pages` with URL, optional label, and `enabled` flag; maintained in Supabase UI.
+- **Deployment configuration**: Fixed at deploy time; includes check schedule and notification recipient email address(es) (secrets/env).
 - **Check run**: One scheduled execution; per-URL status, whether 在庫数 was found, extracted `<h4>` text, and email delivery status.
 - **Match result**: 在庫数 found on a URL with extractable `<h4>` inside `<div class="flr">`; includes URL, extracted heading text, and whether notification is new vs duplicate-suppressed.
 - **Alert email**: One message per check run with new matches; body sections per URL (URL + `<h4>` text).
@@ -95,7 +97,8 @@ As a monitor operator, I do not receive repeated emails for the same unchanged m
 
 - Target pages use a consistent layout with inventory information in `<div class="flr">` and the relevant value or label in a child `<h4>`; pages without this structure are not supported for alerting.
 - The sole search keyword is **在庫数**; no other keywords or per-URL keyword overrides.
-- Monitored URLs and schedule are updated by redeploying the bot, not through an operator console.
+- Monitored URLs are stored in `monitored_pages` and updated manually in Supabase Table Editor; schedule and email remain deploy-time secrets.
+- Initial monitored pages: `https://ofg-web-shop.com/?pid=176762784`, `https://ofg-web-shop.com/?pid=165901954`.
 - Target pages are publicly reachable over HTTP or HTTPS without login for version 1.
 - Default check interval is hourly unless specified in deployment configuration.
 - Email delivery uses a single outbound mailbox or service account configured at deploy time.
@@ -103,7 +106,7 @@ As a monitor operator, I do not receive repeated emails for the same unchanged m
 
 ## Out of Scope
 
-- Runtime monitor management (add, edit, pause, remove URLs or keywords without redeploy).
+- Custom in-app admin UI or public CRUD API for monitored URLs (Supabase Table Editor is the management surface).
 - Configurable keyword lists, case-sensitivity toggles, or whole-word matching options.
 - Generic “surrounding text” excerpts around keyword matches (replaced by structured `<h4>` extraction).
 - Multi-tenant operator accounts and role-based access control.

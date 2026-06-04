@@ -33,4 +33,5 @@
 
 - Validation passed on first iteration (2026-06-04). Spec is ready for `/speckit-plan`.
 - Re-validated after `/speckit-clarify` (2026-06-04): fixed keyword 在庫数, deploy-time URL config, structured `<div class="flr">` / `<h4>` email payload.
+- Plan update: URLs from `monitored_pages` (Supabase UI), seed OFG shop pages `pid=176762784` and `pid=165901954`.
 - Assumptions document v1 boundaries (public pages, redeploy-only configuration, no robots.txt enforcement).

@@ -1,0 +1,104 @@
+openapi: 3.0.3
+info:
+  title: Monitor Check Edge Function
+  version: 1.0.0
+  description: Scheduled website keyword monitor (在庫数) for Supabase Edge Functions
+
+paths:
+  /functions/v1/monitor-check:
+    post:
+      operationId: runMonitorCheck
+      summary: Execute one monitoring cycle for all configured URLs
+      security:
+        - MonitorSecret: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitorCheckRequest'
+      responses:
+        '200':
+          description: Run completed (individual URLs may have failed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitorCheckResponse'
+        '401':
+          description: Missing or invalid x-monitor-secret
+        '500':
+          description: Unrecoverable run failure
+
+components:
+  securitySchemes:
+    MonitorSecret:
+      type: apiKey
+      in: header
+      name: x-monitor-secret
+
+  schemas:
+    MonitorCheckRequest:
+      type: object
+      properties:
+        dry_run:
+          type: boolean
+          default: false
+          description: If true, evaluate matches and DB updates but do not send email
+
+    MonitorCheckResponse:
+      type: object
+      required:
+        - run_id
+        - status
+        - urls_checked
+        - urls_alerted
+        - results
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [completed, failed]
+        urls_checked:
+          type: integer
+        urls_alerted:
+          type: integer
+        email_status:
+          type: string
+          enum: [sent, skipped, failed, not_needed]
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UrlCheckResult'
+
+    UrlCheckResult:
+      type: object
+      required:
+        - url
+        - fetch_status
+        - keyword_found
+        - structure_ok
+        - alert_eligible
+        - alert_sent
+      properties:
+        url:
+          type: string
+          format: uri
+        fetch_status:
+          type: string
+          enum: [ok, error]
+        keyword_found:
+          type: boolean
+        structure_ok:
+          type: boolean
+        h4_text:
+          type: string
+          nullable: true
+        alert_eligible:
+          type: boolean
+        alert_sent:
+          type: boolean
+        skip_reason:
+          type: string
+          nullable: true
