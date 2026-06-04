@@ -18,12 +18,17 @@ export function loadConfig(): AppConfig {
     throw new Error("FETCH_TIMEOUT_MS must be an integer >= 1000");
   }
 
+  // Without a verified domain, Resend only allows onboarding@resend.dev as sender.
+  // Omit RESEND_FROM to use that default; set RESEND_FROM after you verify a domain.
+  const resendFrom = Deno.env.get("RESEND_FROM")?.trim() ||
+    "Flower Monitor <onboarding@resend.dev>";
+
   return {
     supabaseUrl: requireEnv("SUPABASE_URL"),
     supabaseServiceRoleKey: requireEnv("SUPABASE_SERVICE_ROLE_KEY"),
     alertEmail: requireEnv("ALERT_EMAIL"),
     resendApiKey: requireEnv("RESEND_API_KEY"),
-    resendFrom: requireEnv("RESEND_FROM"),
+    resendFrom,
     monitorCronSecret: requireEnv("MONITOR_CRON_SECRET"),
     fetchTimeoutMs,
   };

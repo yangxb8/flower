@@ -7,8 +7,8 @@
 | Secret | Purpose |
 |--------|---------|
 | `RESEND_API_KEY` | Bearer token for Resend API |
-| `RESEND_FROM` | Verified sender, e.g. `monitor@yourdomain.com` |
-| `ALERT_EMAIL` | Recipient (`to` field) |
+| `ALERT_EMAIL` | Recipient (`to`). **Sandbox**: must match your Resend account email |
+| `RESEND_FROM` | Optional. Default `Flower Monitor <onboarding@resend.dev>`. Set after domain verify |
 
 ## Send call
 
@@ -24,7 +24,7 @@ Body (one email per check run when `urls_alerted > 0`):
 
 ```json
 {
-  "from": "{RESEND_FROM}",
+  "from": "Flower Monitor <onboarding@resend.dev>",
   "to": ["{ALERT_EMAIL}"],
   "subject": "[在庫数] {n} page(s) matched",
   "html": "<!-- per-url sections: url + h4_text -->",

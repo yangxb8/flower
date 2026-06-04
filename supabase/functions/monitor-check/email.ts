@@ -1,5 +1,14 @@
 import type { AlertMatch, AppConfig } from "./types.ts";
 
+/**
+ * Resend without a verified custom domain (sandbox / onboarding mode):
+ * - From: `onboarding@resend.dev` only (default when RESEND_FROM is unset)
+ * - To: must be the email address on your Resend account (set ALERT_EMAIL to that)
+ *
+ * After you verify a domain at resend.com/domains, set RESEND_FROM e.g.
+ * `Your App <alerts@yourdomain.com>` and ALERT_EMAIL can be any recipient.
+ */
+
 const RESEND_URL = "https://api.resend.com/emails";
 const RETRY_DELAYS_MS = [1000, 2000, 4000];
 
@@ -39,6 +48,7 @@ export async function sendAlertEmail(
 
   const { html, text } = buildBodies(matches);
   const subject = `[在庫数] ${matches.length} page(s) matched`;
+  // Sandbox: single recipient — your Resend signup email (ALERT_EMAIL)
   const payload = {
     from: config.resendFrom,
     to: [config.alertEmail],
