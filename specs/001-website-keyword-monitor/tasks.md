@@ -29,9 +29,9 @@ description: "Task list for Website Keyword Monitor (Supabase Edge Function)"
 
 **Purpose**: Initialize Supabase project layout and Edge Function scaffold
 
-- [ ] T001 Run `supabase init` and create `supabase/config.toml` with project settings
-- [ ] T002 Create Edge Function scaffold at `supabase/functions/monitor-check/` with `deno.json` (or import map) for `@supabase/supabase-js` and `npm:linkedom`
-- [ ] T003 [P] Add `supabase/.env.example` documenting `ALERT_EMAIL`, `RESEND_API_KEY`, `RESEND_FROM`, `MONITOR_CRON_SECRET`, `FETCH_TIMEOUT_MS` (URLs come from DB, not env) per `specs/001-website-keyword-monitor/quickstart.md`
+- [x] T001 Run `supabase init` and create `supabase/config.toml` with project settings
+- [x] T002 Create Edge Function scaffold at `supabase/functions/monitor-check/` with `deno.json` (or import map) for `@supabase/supabase-js` and `npm:linkedom`
+- [x] T003 [P] Add `supabase/.env.example` documenting `ALERT_EMAIL`, `RESEND_API_KEY`, `RESEND_FROM`, `MONITOR_CRON_SECRET`, `FETCH_TIMEOUT_MS` (URLs come from DB, not env) per `specs/001-website-keyword-monitor/quickstart.md`
 
 ---
 
@@ -41,11 +41,11 @@ description: "Task list for Website Keyword Monitor (Supabase Edge Function)"
 
 **⚠️ CRITICAL**: No user story work until this phase is complete
 
-- [ ] T004 Create migration `supabase/migrations/20260604000000_monitor_schema.sql` with tables `monitored_pages`, `page_watch_state`, `check_runs`, `check_run_results` and **seed** two OFG URLs (`?pid=176762784`, `?pid=165901954`) per `specs/001-website-keyword-monitor/data-model.md`
-- [ ] T005 [P] Implement Supabase client helpers in `supabase/functions/monitor-check/db.ts` (load enabled `monitored_pages`, create run, insert results, complete run, upsert watch state)
-- [ ] T006 [P] Implement env validation in `supabase/functions/monitor-check/config.ts` (required secrets, default `FETCH_TIMEOUT_MS`; no `MONITOR_URLS`)
-- [ ] T007 Implement `x-monitor-secret` verification in `supabase/functions/monitor-check/auth.ts` per `specs/001-website-keyword-monitor/contracts/monitor-check.openapi.yaml`
-- [ ] T008 Apply migration locally with `supabase db reset` or `supabase migration up` and verify four tables exist plus two seed rows in `monitored_pages`
+- [x] T004 Create migration `supabase/migrations/20260604000000_monitor_schema.sql` with tables `monitored_pages`, `page_watch_state`, `check_runs`, `check_run_results` and **seed** two OFG URLs (`?pid=176762784`, `?pid=165901954`) per `specs/001-website-keyword-monitor/data-model.md`
+- [x] T005 [P] Implement Supabase client helpers in `supabase/functions/monitor-check/db.ts` (load enabled `monitored_pages`, create run, insert results, complete run, upsert watch state)
+- [x] T006 [P] Implement env validation in `supabase/functions/monitor-check/config.ts` (required secrets, default `FETCH_TIMEOUT_MS`; no `MONITOR_URLS`)
+- [x] T007 Implement `x-monitor-secret` verification in `supabase/functions/monitor-check/auth.ts` per `specs/001-website-keyword-monitor/contracts/monitor-check.openapi.yaml`
+- [x] T008 Apply migration locally with `supabase db reset` or `supabase migration up` and verify four tables exist plus two seed rows in `monitored_pages`
 
 **Checkpoint**: Foundation ready — user story implementation can begin
 
@@ -59,13 +59,13 @@ description: "Task list for Website Keyword Monitor (Supabase Edge Function)"
 
 ### Implementation for User Story 1
 
-- [ ] T009 [P] [US1] Implement HTTP fetch with timeout in `supabase/functions/monitor-check/fetch-page.ts`
-- [ ] T010 [P] [US1] Implement keyword + DOM extraction in `supabase/functions/monitor-check/parse-inventory.ts` (在庫数 substring, `div.flr h4` text, multiple `h4` joined/labeled)
-- [ ] T011 [P] [US1] Implement Resend batch send with HTML/plain templates in `supabase/functions/monitor-check/email.ts` per `specs/001-website-keyword-monitor/contracts/resend-send.md` and `alert-email.schema.json`
-- [ ] T012 [US1] Implement `supabase/functions/monitor-check/pages.ts` to load enabled URLs from `monitored_pages` and orchestration in `index.ts`: secret check, insert `check_runs`, loop DB URLs, fetch→parse, log `check_run_results`, batch email when any URL has keyword+structure (dedup stub: treat all present matches as eligible)
-- [ ] T013 [US1] Return JSON response matching `specs/001-website-keyword-monitor/contracts/monitor-check.openapi.yaml` (`run_id`, `results[]`, `email_status`)
-- [ ] T014 [US1] Support `dry_run` request body flag (evaluate and log, no Resend call, no `notified_while_present` updates)
-- [ ] T015 [US1] Handle edge cases in `index.ts`: fetch error continues other URLs (FR-010); missing `div.flr`/`h4` → no alert, `structure_ok: false` (FR/spec edge cases)
+- [x] T009 [P] [US1] Implement HTTP fetch with timeout in `supabase/functions/monitor-check/fetch-page.ts`
+- [x] T010 [P] [US1] Implement keyword + DOM extraction in `supabase/functions/monitor-check/parse-inventory.ts` (在庫数 substring, `div.flr h4` text, multiple `h4` joined/labeled)
+- [x] T011 [P] [US1] Implement Resend batch send with HTML/plain templates in `supabase/functions/monitor-check/email.ts` per `specs/001-website-keyword-monitor/contracts/resend-send.md` and `alert-email.schema.json`
+- [x] T012 [US1] Implement `supabase/functions/monitor-check/pages.ts` to load enabled URLs from `monitored_pages` and orchestration in `index.ts`: secret check, insert `check_runs`, loop DB URLs, fetch→parse, log `check_run_results`, batch email when any URL has keyword+structure (dedup stub: treat all present matches as eligible)
+- [x] T013 [US1] Return JSON response matching `specs/001-website-keyword-monitor/contracts/monitor-check.openapi.yaml` (`run_id`, `results[]`, `email_status`)
+- [x] T014 [US1] Support `dry_run` request body flag (evaluate and log, no Resend call, no `notified_while_present` updates)
+- [x] T015 [US1] Handle edge cases in `index.ts`: fetch error continues other URLs (FR-010); missing `div.flr`/`h4` → no alert, `structure_ok: false` (FR/spec edge cases)
 
 **Checkpoint**: MVP — operator gets correct first alert email for matching pages
 
@@ -79,11 +79,11 @@ description: "Task list for Website Keyword Monitor (Supabase Edge Function)"
 
 ### Implementation for User Story 2
 
-- [ ] T016 [P] [US2] Implement disappear→reappear state machine in `supabase/functions/monitor-check/dedup.ts` per `specs/001-website-keyword-monitor/data-model.md`
-- [ ] T017 [US2] Integrate `dedup.ts` into `supabase/functions/monitor-check/index.ts`: load/upsert `page_watch_state`, set `alert_eligible` and `skip_reason` (`already_notified`, `keyword_absent`, etc.)
-- [ ] T018 [US2] Set `notified_while_present` and `keyword_present` in `page_watch_state` only after successful Resend send (rollback eligibility if email fails)
-- [ ] T019 [US2] Reset `notified_while_present` when `keyword_present` transitions to false (在庫数 disappeared)
-- [ ] T020 [US2] Add Resend retry logic (3 attempts, 1s/2s/4s backoff) in `supabase/functions/monitor-check/email.ts` for 429/5xx; set `check_runs.email_status` to `failed` on exhaustion
+- [x] T016 [P] [US2] Implement disappear→reappear state machine in `supabase/functions/monitor-check/dedup.ts` per `specs/001-website-keyword-monitor/data-model.md`
+- [x] T017 [US2] Integrate `dedup.ts` into `supabase/functions/monitor-check/index.ts`: load/upsert `page_watch_state`, set `alert_eligible` and `skip_reason` (`already_notified`, `keyword_absent`, etc.)
+- [x] T018 [US2] Set `notified_while_present` and `keyword_present` in `page_watch_state` only after successful Resend send (rollback eligibility if email fails)
+- [x] T019 [US2] Reset `notified_while_present` when `keyword_present` transitions to false (在庫数 disappeared)
+- [x] T020 [US2] Add Resend retry logic (3 attempts, 1s/2s/4s backoff) in `supabase/functions/monitor-check/email.ts` for 429/5xx; set `check_runs.email_status` to `failed` on exhaustion
 
 **Checkpoint**: US1 + US2 — no spam while keyword remains; re-alert after disappear→reappear
 
@@ -93,11 +93,11 @@ description: "Task list for Website Keyword Monitor (Supabase Edge Function)"
 
 **Purpose**: Scheduling, retention, deploy docs, optional tests
 
-- [ ] T021 [P] Add cron schedule documentation or SQL in `supabase/migrations/` for hourly invoke via Dashboard/`pg_cron` per `specs/001-website-keyword-monitor/quickstart.md`
-- [ ] T022 [P] Add retention cleanup SQL or migration comment for purging `check_runs`/`check_run_results` older than 30 days
-- [ ] T023 Deploy `monitor-check` with `supabase functions deploy monitor-check --no-verify-jwt` and set secrets via `supabase secrets set`
-- [ ] T024 Run end-to-end validation following `specs/001-website-keyword-monitor/quickstart.md` (dry_run, live send, dedup scenario)
-- [ ] T025 [P] Optional: add Deno unit tests in `tests/monitor-check/parse-inventory.test.ts` and `tests/monitor-check/dedup.test.ts` per plan.md
+- [x] T021 [P] Add cron schedule documentation or SQL in `supabase/migrations/` for hourly invoke via Dashboard/`pg_cron` per `specs/001-website-keyword-monitor/quickstart.md`
+- [x] T022 [P] Add retention cleanup SQL or migration comment for purging `check_runs`/`check_run_results` older than 30 days
+- [x] T023 Deploy `monitor-check` with `supabase functions deploy monitor-check --no-verify-jwt` and set secrets via `supabase secrets set`
+- [x] T024 Run end-to-end validation following `specs/001-website-keyword-monitor/quickstart.md` (dry_run, live send, dedup scenario)
+- [x] T025 [P] Optional: add Deno unit tests in `tests/monitor-check/parse-inventory.test.ts` and `tests/monitor-check/dedup.test.ts` per plan.md
 
 ---
 

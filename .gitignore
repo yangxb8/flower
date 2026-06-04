@@ -1,0 +1,22 @@
+# Dependencies & build
+node_modules/
+dist/
+build/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+supabase/.env
+
+# Supabase local
+supabase/.branches
+supabase/.temp
+
+# MCP local overrides
+.cursor/mcp.local.json
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+*.log
