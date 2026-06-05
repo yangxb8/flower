@@ -1,3 +1,5 @@
+import { decodeHtmlResponse } from "./html-encoding.ts";
+
 export interface FetchOutcome {
   ok: boolean;
   body: string | null;
@@ -30,7 +32,7 @@ export async function fetchPage(
       };
     }
 
-    const body = await response.text();
+    const body = await decodeHtmlResponse(response);
     return { ok: true, body, error: null };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
