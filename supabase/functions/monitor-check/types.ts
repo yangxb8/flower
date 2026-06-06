@@ -20,6 +20,8 @@ export interface PageWatchState {
   keyword_present: boolean;
   notified_while_present: boolean;
   last_h4_text: string | null;
+  maintenance_404_present: boolean;
+  notified_while_404: boolean;
 }
 
 export interface ParseResult {
@@ -41,18 +43,49 @@ export interface DedupOutput {
   lastH4Text: string | null;
 }
 
+export interface MaintenanceDedupInput {
+  previous: PageWatchState | null;
+  now404: boolean;
+  recovered: boolean;
+}
+
+export interface MaintenanceDedupOutput {
+  maintenance404Present: boolean;
+  notifiedWhile404: boolean;
+  maintenanceEligible: boolean;
+  skipReason: string | null;
+}
+
 export interface UrlCheckResult {
   url: string;
   fetch_status: "ok" | "error";
+  http_status: number | null;
   keyword_found: boolean;
   structure_ok: boolean;
   h4_text: string | null;
   alert_eligible: boolean;
   alert_sent: boolean;
   skip_reason: string | null;
+  maintenance_detected: boolean;
+  maintenance_eligible: boolean;
+  maintenance_sent: boolean;
+  maintenance_skip_reason: string | null;
 }
 
 export interface AlertMatch {
   url: string;
   h4_text: string;
+}
+
+export interface MaintenanceMatch {
+  url: string;
+  label: string | null;
+}
+
+export interface WatchStateUpdate {
+  keyword_present: boolean;
+  notified_while_present: boolean;
+  last_h4_text: string | null;
+  maintenance_404_present: boolean;
+  notified_while_404: boolean;
 }

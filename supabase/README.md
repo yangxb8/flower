@@ -1,5 +1,7 @@
 # Supabase — Website Keyword Monitor
 
+Monitors product pages for **在庫数** inventory alerts and **HTTP 404** maintenance alerts (feature `002-404-maintenance-alert`). See [quickstart for 404 maintenance](../specs/002-404-maintenance-alert/quickstart.md).
+
 ## Prerequisites
 
 - [Supabase CLI](https://supabase.com/docs/guides/cli)
@@ -59,3 +61,10 @@ deno test tests/monitor-check/
 ## Monitored URLs
 
 Edit **Table Editor → `monitored_pages`**. Seed URLs are in migration `20260604000000_monitor_schema.sql`.
+
+## Maintenance 404 alerts
+
+- **HTTP 404** on a monitored URL sends a distinct `[メンテナンス]` email (product may open for sale soon).
+- **Dedup**: one email per 404 episode; no repeat while still 404; new email after page recovers (2xx) then 404 again.
+- Schema: migration `20260605000000_maintenance_404_schema.sql`.
+- Verify state: `SELECT url, maintenance_404_present, notified_while_404 FROM page_watch_state;`

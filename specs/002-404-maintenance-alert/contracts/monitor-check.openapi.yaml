@@ -1,0 +1,137 @@
+openapi: 3.0.3
+info:
+  title: Monitor Check Edge Function
+  version: 1.1.0
+  description: |
+    Scheduled website monitor for Supabase Edge Functions.
+    Feature 001 — 在庫数 inventory alerts.
+    Feature 002 — HTTP 404 maintenance alerts (distinct email, same invoke).
+
+paths:
+  /functions/v1/monitor-check:
+    post:
+      operationId: runMonitorCheck
+      summary: Execute one monitoring cycle for all configured URLs
+      security:
+        - MonitorSecret: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitorCheckRequest'
+      responses:
+        '200':
+          description: Run completed (individual URLs may have failed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitorCheckResponse'
+        '401':
+          description: Missing or invalid x-monitor-secret
+        '500':
+          description: Unrecoverable run failure
+
+components:
+  securitySchemes:
+    MonitorSecret:
+      type: apiKey
+      in: header
+      name: x-monitor-secret
+
+  schemas:
+    MonitorCheckRequest:
+      type: object
+      properties:
+        dry_run:
+          type: boolean
+          default: false
+          description: If true, evaluate matches and DB updates but do not send email
+
+    MonitorCheckResponse:
+      type: object
+      required:
+        - run_id
+        - status
+        - urls_checked
+        - urls_alerted
+        - maintenance_urls_alerted
+        - results
+      properties:
+        run_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [completed, failed]
+        urls_checked:
+          type: integer
+        urls_alerted:
+          type: integer
+          description: Inventory (在庫数) URLs emailed this run
+        email_status:
+          type: string
+          enum: [sent, skipped, failed, not_needed]
+          description: Inventory email delivery status
+        maintenance_urls_alerted:
+          type: integer
+          description: Maintenance (404) URLs emailed this run
+        maintenance_email_status:
+          type: string
+          enum: [sent, skipped, failed, not_needed]
+          description: Maintenance email delivery status
+        dry_run:
+          type: boolean
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UrlCheckResult'
+
+    UrlCheckResult:
+      type: object
+      required:
+        - url
+        - fetch_status
+        - keyword_found
+        - structure_ok
+        - alert_eligible
+        - alert_sent
+        - maintenance_detected
+        - maintenance_eligible
+        - maintenance_sent
+      properties:
+        url:
+          type: string
+          format: uri
+        fetch_status:
+          type: string
+          enum: [ok, error]
+        http_status:
+          type: integer
+          nullable: true
+          description: HTTP status when response received (e.g. 200, 404, 500)
+        keyword_found:
+          type: boolean
+        structure_ok:
+          type: boolean
+        h4_text:
+          type: string
+          nullable: true
+        alert_eligible:
+          type: boolean
+        alert_sent:
+          type: boolean
+        skip_reason:
+          type: string
+          nullable: true
+        maintenance_detected:
+          type: boolean
+          description: true when http_status is 404
+        maintenance_eligible:
+          type: boolean
+        maintenance_sent:
+          type: boolean
+        maintenance_skip_reason:
+          type: string
+          nullable: true
+          description: e.g. already_notified, not_404, fetch_error

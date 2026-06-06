@@ -2,6 +2,7 @@ import { decodeHtmlResponse } from "./html-encoding.ts";
 
 export interface FetchOutcome {
   ok: boolean;
+  status: number | null;
   body: string | null;
   error: string | null;
 }
@@ -24,19 +25,31 @@ export async function fetchPage(
       redirect: "follow",
     });
 
+    const status = response.status;
+
+    if (status === 404) {
+      return {
+        ok: false,
+        status: 404,
+        body: null,
+        error: "HTTP 404 Not Found",
+      };
+    }
+
     if (!response.ok) {
       return {
         ok: false,
+        status,
         body: null,
-        error: `HTTP ${response.status} ${response.statusText}`,
+        error: `HTTP ${status} ${response.statusText}`,
       };
     }
 
     const body = await decodeHtmlResponse(response);
-    return { ok: true, body, error: null };
+    return { ok: true, status, body, error: null };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    return { ok: false, body: null, error: message };
+    return { ok: false, status: null, body: null, error: message };
   } finally {
     clearTimeout(timer);
   }
