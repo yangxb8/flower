@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maintenance-email.schema.json",
+  "title": "MaintenanceAlertEmail",
+  "description": "Batch maintenance email when one or more URLs newly return HTTP 404 (maintenance episode)",
+  "type": "object",
+  "required": ["subject", "recipient", "run_id", "urls"],
+  "properties": {
+    "subject": {
+      "type": "string",
+      "description": "e.g. [メンテナンス] 2 page(s) may open for sale soon"
+    },
+    "recipient": {
+      "type": "string",
+      "format": "email"
+    },
+    "run_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "urls": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Monitored page that newly entered HTTP 404 maintenance episode"
+          },
+          "label": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional label from monitored_pages.label"
+          }
+        }
+      }
+    }
+  }
+}

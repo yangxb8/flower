@@ -6,17 +6,17 @@ alwaysApply: true
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan:
 
-**Plan**: `specs/001-website-keyword-monitor/plan.md`
+**Plan**: `specs/002-404-maintenance-alert/plan.md` (extends `specs/001-website-keyword-monitor/plan.md`)
 
-**Stack**: Supabase Edge Functions (Deno/TypeScript), PostgreSQL (`page_watch_state`, `check_runs`, `check_run_results`), **Resend only** for alert email (`RESEND_API_KEY`, `RESEND_FROM`, `ALERT_EMAIL`).
+**Stack**: Supabase Edge Functions (Deno/TypeScript), PostgreSQL (`monitored_pages`, `page_watch_state`, `check_runs`, `check_run_results`), **Resend** for email (`RESEND_API_KEY`, `RESEND_FROM`, `ALERT_EMAIL`).
 
-**Dedup rule**: Email only when 在庫数 **reappears** on a URL after a prior check saw it **absent**; no repeat emails while keyword stays present.
+**Inventory alerts (001)**: 在庫数 keyword + `div.flr` → `h4` extraction; dedup = disappear→reappear per URL.
 
-**Extraction**: `div.flr` → `h4` text in alert email + keyword substring `在庫数` in page body.
+**Maintenance alerts (002)**: HTTP **404** = maintenance episode; distinct `[メンテナンス]` email; same disappear→reappear dedup (`maintenance_404_present`, `notified_while_404`); recovery on HTTP 2xx; no keyword parse on 404.
 
-**Pages**: `monitored_pages` table (edit in Supabase UI); seed OFG URLs `pid=176762784`, `pid=165901954`.
+**Pages**: `monitored_pages` table (Supabase Table Editor).
 
-**Config**: `ALERT_EMAIL`, Resend secrets, cron secret — deploy-time env only.
+**Config**: `ALERT_EMAIL`, Resend secrets, `MONITOR_CRON_SECRET` — deploy-time env only.
 
-**Artifacts**: `specs/001-website-keyword-monitor/research.md`, `data-model.md`, `quickstart.md`, `contracts/`.
+**Artifacts**: `specs/002-404-maintenance-alert/` — `research.md`, `data-model.md`, `quickstart.md`, `contracts/`.
 <!-- SPECKIT END -->

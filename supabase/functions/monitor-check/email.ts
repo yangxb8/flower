@@ -1,4 +1,4 @@
-import type { AlertMatch, AppConfig } from "./types.ts";
+import type { AlertMatch, AppConfig, MaintenanceMatch } from "./types.ts";
 
 /**
  * Resend without a verified custom domain (sandbox / onboarding mode):
@@ -38,17 +38,33 @@ function shouldRetry(status: number): boolean {
   return status === 429 || status >= 500;
 }
 
-export async function sendAlertEmail(
-  config: AppConfig,
-  matches: AlertMatch[],
-): Promise<{ ok: boolean; error: string | null }> {
-  if (matches.length === 0) {
-    return { ok: true, error: null };
-  }
+function buildMaintenanceBodies(
+  matches: MaintenanceMatch[],
+): { html: string; text: string } {
+  const intro =
+    "These product pages returned HTTP 404 (maintenance). They may open for sale soon.";
+  const htmlParts = matches.map((m) => {
+    const labelLine = m.label
+      ? `<p><strong>Label:</strong> ${escapeHtml(m.label)}</p>`
+      : "";
+    return `<section><p><strong>URL:</strong> <a href="${escapeHtml(m.url)}">${escapeHtml(m.url)}</a></p>${labelLine}</section>`;
+  });
+  const textParts = matches.map((m) => {
+    const labelLine = m.label ? `Label: ${m.label}\n` : "";
+    return `${labelLine}URL: ${m.url}`;
+  });
+  return {
+    html: `<div><p>${escapeHtml(intro)}</p>${htmlParts.join("<hr/>")}</div>`,
+    text: `${intro}\n\n${textParts.join("\n\n---\n\n")}`,
+  };
+}
 
-  const { html, text } = buildBodies(matches);
-  const subject = `[在庫数] ${matches.length} page(s) matched`;
-  // Sandbox: single recipient — your Resend signup email (ALERT_EMAIL)
+async function postResendEmail(
+  config: AppConfig,
+  subject: string,
+  html: string,
+  text: string,
+): Promise<{ ok: boolean; error: string | null }> {
   const payload = {
     from: config.resendFrom,
     to: [config.alertEmail],
@@ -91,4 +107,31 @@ export async function sendAlertEmail(
   }
 
   return { ok: false, error: lastError };
+}
+
+export async function sendAlertEmail(
+  config: AppConfig,
+  matches: AlertMatch[],
+): Promise<{ ok: boolean; error: string | null }> {
+  if (matches.length === 0) {
+    return { ok: true, error: null };
+  }
+
+  const { html, text } = buildBodies(matches);
+  const subject = `[在庫数] ${matches.length} page(s) matched`;
+  return postResendEmail(config, subject, html, text);
+}
+
+export async function sendMaintenanceEmail(
+  config: AppConfig,
+  matches: MaintenanceMatch[],
+): Promise<{ ok: boolean; error: string | null }> {
+  if (matches.length === 0) {
+    return { ok: true, error: null };
+  }
+
+  const { html, text } = buildMaintenanceBodies(matches);
+  const subject =
+    `[メンテナンス] ${matches.length} page(s) may open for sale soon`;
+  return postResendEmail(config, subject, html, text);
 }
