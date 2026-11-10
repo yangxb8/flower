@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "lib": ["deno.window", "dom"]
+  },
+  "imports": {
+    "@supabase/supabase-js": "jsr:@supabase/supabase-js@2",
+    "linkedom": "npm:linkedom@0.18.9",
+    "iconv-lite": "npm:iconv-lite@0.6.3"
+  }
+}

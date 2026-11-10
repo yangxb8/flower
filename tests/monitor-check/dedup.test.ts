@@ -20,6 +20,8 @@ Deno.test("dedup - already notified while present", () => {
       keyword_present: true,
       notified_while_present: true,
       last_h4_text: "残り 3 点",
+      maintenance_404_present: false,
+      notified_while_404: false,
     },
     parse: present,
   });
@@ -34,6 +36,8 @@ Deno.test("dedup - reappear after absent", () => {
       keyword_present: false,
       notified_while_present: false,
       last_h4_text: null,
+      maintenance_404_present: false,
+      notified_while_404: false,
     },
     parse: present,
   });
@@ -47,6 +51,8 @@ Deno.test("dedup - keyword disappeared resets state", () => {
       keyword_present: true,
       notified_while_present: true,
       last_h4_text: "x",
+      maintenance_404_present: false,
+      notified_while_404: false,
     },
     parse: { keywordFound: false, structureOk: false, h4Text: null },
   });
