@@ -9,15 +9,17 @@ Monitors product pages for **在庫数** inventory alerts and **HTTP 404** maint
 
 ## Local setup
 
+Requires Supabase CLI 3.1+ (native stack when Docker is not running) and Deno 2.
+
 ```bash
-cd supabase
-cp .env.example .env
-# Edit .env with local keys from `supabase status`
+cp supabase/.env.example supabase/.env
+# Set ALERT_EMAIL, RESEND_API_KEY, and MONITOR_CRON_SECRET.
+# `supabase start` injects SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
 
 supabase start
-supabase db reset
-supabase functions serve monitor-check --env-file .env
 ```
+
+`supabase start` applies migrations and serves `monitor-check`. Re-run `supabase db reset` to rebuild the local database from migrations.
 
 ## Deploy (hosted)
 

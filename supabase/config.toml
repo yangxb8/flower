@@ -18,9 +18,14 @@ major_version = 15
 enabled = true
 port = 54323
 
-[inbucket]
+# Email testing server (CLI 3 renamed [inbucket] to [local_smtp]).
+[local_smtp]
 enabled = true
 port = 54324
+
+# Native local stack (no Docker) for Cloud Agents; Docker is used when the daemon is reachable.
+[experimental]
+stack = true
 
 [storage]
 enabled = false
@@ -32,6 +37,12 @@ enabled = false
 enabled = true
 policy = "per_worker"
 inspector_port = 8083
+
+# Loaded from supabase/.env (gitignored). Injected into the local edge runtime.
+[edge_runtime.secrets]
+ALERT_EMAIL = "env(ALERT_EMAIL)"
+RESEND_API_KEY = "env(RESEND_API_KEY)"
+MONITOR_CRON_SECRET = "env(MONITOR_CRON_SECRET)"
 
 [functions.monitor-check]
 verify_jwt = false
